@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>4-Day Compound Reset</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0a0a0a;--dark:#111111;--card:#181818;--border:#2a2a2a;--accent:#c8f55a;--accent2:#f5a623;--muted:#666;--text:#e8e8e8;--text-dim:#999;--green:#55ff99;--red:#ff5555;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--black);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding:20px 16px 100px;}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+input[type=number]{-webkit-appearance:none;}
+
+.header{max-width:720px;margin:0 auto 0;padding-bottom:16px;border-bottom:1px solid var(--border);}
+.title{font-family:'Bebas Neue',sans-serif;font-size:clamp(38px,8vw,64px);line-height:0.9;letter-spacing:1px;}
+.title span{color:var(--accent);}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.badge{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 8px;border-radius:4px;border:1px solid var(--border);color:var(--text-dim);}
+.badge.a{border-color:var(--accent);color:var(--accent);}
+.saving{font-family:'DM Mono',monospace;font-size:8px;color:var(--accent2);letter-spacing:2px;margin-top:4px;height:12px;}
+
+.wrap{max-width:720px;margin:0 auto;}
+
+.tabs{display:flex;gap:8px;margin:14px 0;}
+.tab{flex:1;padding:10px;text-align:center;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;border:1px solid var(--border);border-radius:8px;cursor:pointer;color:var(--muted);background:var(--card);transition:all 0.15s;}
+.tab.active{border-color:var(--accent);color:var(--accent);background:rgba(200,245,90,0.05);}
+
+.week-nav{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.wlabel{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex-shrink:0;}
+.weeks{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;flex:1;}
+.wbtn{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:7px 2px;cursor:pointer;text-align:center;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);transition:all 0.15s;}
+.wbtn.active{background:rgba(200,245,90,0.1);border-color:var(--accent);color:var(--accent);}
+
+.day-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+.dbtn{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 6px;cursor:pointer;text-align:center;transition:all 0.15s;position:relative;}
+.dbtn.active{background:var(--accent);border-color:var(--accent);}
+.dbtn .dot{position:absolute;top:5px;right:5px;width:5px;height:5px;border-radius:50%;background:var(--accent);display:none;}
+.dbtn.active .dot{background:var(--black);}
+.dbtn .dl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px;}
+.dbtn.active .dl,.dbtn.active .dn,.dbtn.active .dt{color:var(--black);}
+.dbtn .dn{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--text);display:block;line-height:1;}
+.dbtn .dt{font-size:8px;color:var(--muted);margin-top:3px;display:block;}
+
+.day-header{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.day-num{font-family:'Bebas Neue',sans-serif;font-size:56px;line-height:1;color:var(--border);}
+.day-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.5px;}
+.day-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+
+.block{margin-bottom:14px;border-radius:12px;overflow:hidden;border:1px solid var(--border);}
+.block-header{background:var(--card);padding:9px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+.block-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);}
+.block-note{font-size:10px;color:var(--muted);}
+.compound-tag{margin-left:auto;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:3px 7px;border-radius:3px;background:rgba(200,245,90,0.1);color:var(--accent);border:1px solid rgba(200,245,90,0.2);}
+
+.ex-block{border-bottom:1px solid var(--border);}
+.ex-block:last-of-type{border-bottom:none;}
+.ex-block.primary{background:#141414;}
+.ex-block.secondary{background:var(--dark);}
+.ex-top{padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;}
+.ex-left{display:flex;align-items:center;gap:10px;}
+.ex-letter{font-family:'Bebas Neue',sans-serif;font-size:19px;width:22px;flex-shrink:0;}
+.ex-letter.p{color:var(--accent);}
+.ex-letter.s{color:var(--muted);}
+.ex-name{font-size:13px;font-weight:500;}
+.ex-cue{font-size:10px;color:var(--muted);margin-top:2px;}
+.ex-sets-label{text-align:right;}
+.ex-sets-main{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;white-space:nowrap;}
+.ex-sets-sub{font-size:9px;color:var(--muted);margin-top:1px;}
+
+.logger{padding:8px 14px 12px;background:rgba(0,0,0,0.3);border-top:1px solid var(--border);}
+.logger-title{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#333;margin-bottom:7px;}
+.set-rows{display:flex;flex-direction:column;gap:6px;}
+.set-row{display:grid;grid-template-columns:22px 1fr 1fr 30px;gap:5px;align-items:center;}
+.set-num{font-family:'DM Mono',monospace;font-size:10px;color:#333;text-align:center;}
+.set-input{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:7px 6px;font-family:'DM Mono',monospace;font-size:13px;color:var(--text);text-align:center;width:100%;outline:none;transition:border-color 0.15s;}
+.set-input:focus{border-color:var(--accent);}
+.set-input::placeholder{color:#2a2a2a;font-size:10px;}
+.tick{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.15s;flex-shrink:0;}
+.tick.done{background:rgba(200,245,90,0.15);border-color:var(--accent);}
+.prev-best{font-family:'DM Mono',monospace;font-size:9px;color:#333;padding-left:27px;margin-top:3px;}
+.prev-best span{color:var(--accent2);}
+
+.rest-row{background:var(--black);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);}
+.rest-label{font-family:'DM Mono',monospace;font-size:9px;color:#333;}
+.rest-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:5px 12px;border-radius:4px;background:rgba(200,245,90,0.08);border:1px solid rgba(200,245,90,0.2);color:var(--accent);cursor:pointer;transition:all 0.15s;}
+.rest-btn:hover{background:rgba(200,245,90,0.15);}
+
+.notes-box{margin-top:20px;padding:14px;background:var(--card);border-radius:12px;border:1px solid var(--border);}
+.notes-title{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);margin-bottom:8px;}
+.note-item{font-size:11px;color:var(--text-dim);padding:3px 0 3px 13px;position:relative;line-height:1.5;}
+.note-item::before{content:'→';position:absolute;left:0;color:var(--accent2);font-size:10px;}
+
+.global-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;}
+@media(max-width:400px){.global-grid{grid-template-columns:1fr;}}
+.global-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.global-card h3{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.global-item{font-size:11px;color:var(--text-dim);padding-left:10px;position:relative;padding-bottom:3px;line-height:1.6;}
+.global-item::before{content:'·';position:absolute;left:0;color:var(--accent);}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:4px;}
+.wday{text-align:center;font-family:'DM Mono',monospace;font-size:7px;padding:5px 2px;border-radius:3px;color:var(--muted);background:var(--dark);}
+.wday.lift{background:rgba(200,245,90,0.12);color:var(--accent);}
+
+/* PROGRESS */
+.prog-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+@media(max-width:400px){.prog-grid{grid-template-columns:1fr;}}
+.prog-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.prog-card h3{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.lift-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);}
+.lift-row:last-child{border-bottom:none;}
+.lift-name{font-size:12px;color:var(--text-dim);}
+.lift-val{font-family:'DM Mono',monospace;font-size:11px;}
+.lift-val.up{color:var(--green);}
+.lift-val.none{color:#333;}
+.lift-change{display:flex;gap:5px;align-items:center;}
+.lift-prev{font-family:'DM Mono',monospace;font-size:10px;color:#444;}
+.lift-arrow{font-size:9px;color:#333;}
+
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;overflow-x:auto;}
+.table-card h3{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+table{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:10px;}
+th,td{padding:6px 4px;text-align:center;}
+th{color:#333;font-weight:400;padding-bottom:8px;}
+th.lift-col,td.lift-col{text-align:left;padding-right:8px;color:var(--text-dim);white-space:nowrap;}
+tr{border-top:1px solid var(--border);}
+tr:first-child{border-top:none;}
+td.has{color:var(--text);}
+td.cur{background:rgba(200,245,90,0.03);}
+th.cur{color:var(--accent);}
+
+/* TIMER */
+.timer{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--card);border-radius:14px;padding:14px 28px;text-align:center;z-index:100;box-shadow:0 8px 32px rgba(0,0,0,0.7);min-width:160px;}
+.timer.active{display:block;}
+.timer-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.timer-count{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;}
+.timer-bar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+.timer-fill{height:100%;border-radius:2px;transition:width 1s linear;}
+.timer-dismiss{margin-top:10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;padding:4px 12px;border:1px solid var(--border);border-radius:4px;display:inline-block;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="max-width:720px;margin:0 auto;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div>
+      <div class="title">4-DAY<br><span>COMPOUND</span><br>RESET</div>
+      <div class="badges">
+        <div class="badge a">4x / week</div>
+        <div class="badge">45–60 min</div>
+        <div class="badge">8 Week Block</div>
+      </div>
+    </div>
+  </div>
+  <div style="max-width:720px;margin:0 auto;"><div class="saving" id="saving-indicator"></div></div>
+</div>
+
+<div class="wrap">
+  <div class="tabs">
+    <div class="tab active" onclick="setView('workout')">Workout</div>
+    <div class="tab" onclick="setView('progress')">Progress</div>
+  </div>
+
+  <div class="week-nav">
+    <span class="wlabel">Week</span>
+    <div class="weeks" id="week-btns"></div>
+  </div>
+
+  <!-- DAY NAV -->
+  <div class="day-nav" id="day-nav"></div>
+
+  <!-- WORKOUT VIEW -->
+  <div id="workout-view">
+    <div id="day-header-area"></div>
+    <div id="blocks-area"></div>
+    <div class="notes-box" id="notes-area"></div>
+    <div class="global-grid">
+      <div class="global-card">
+        <h3>Weekly Schedule</h3>
+        <div class="week-grid">
+          <div class="wday lift">MON<br>SQT</div>
+          <div class="wday lift">TUE<br>BCH</div>
+          <div class="wday">WED<br>REST</div>
+          <div class="wday lift">THU<br>DL</div>
+          <div class="wday">FRI<br>REST</div>
+          <div class="wday lift">SAT<br>OHP</div>
+          <div class="wday">SUN<br>REST</div>
+        </div>
+      </div>
+      <div class="global-card">
+        <h3>Set Structure</h3>
+        <div class="global-item">Main lift: 4×5, Heavy (RPE 8)</div>
+        <div class="global-item">Middle superset: 3×10, Moderate</div>
+        <div class="global-item">Final superset: 3×12, Light</div>
+        <div class="global-item">Hit all reps → add 2.5kg next week</div>
+      </div>
+      <div class="global-card">
+        <h3>RPE Guide</h3>
+        <div class="global-item">Heavy = RPE 8, ~2 reps left</div>
+        <div class="global-item">Moderate = RPE 7, ~3 reps left</div>
+        <div class="global-item">Light = form is the constraint</div>
+        <div class="global-item">Set 1 too easy? Add weight now</div>
+      </div>
+      <div class="global-card">
+        <h3>Fat Loss</h3>
+        <div class="global-item">30–40g protein within 1hr post</div>
+        <div class="global-item">Don't train fasted if energy tanks</div>
+        <div class="global-item">Steps on rest days matter too</div>
+        <div class="global-item">Keep lifting heavy in deficit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS VIEW -->
+  <div id="progress-view" style="display:none;">
+    <div class="prog-grid">
+      <div class="prog-card">
+        <h3>All-Time Best (kg)</h3>
+        <div id="prog-best"></div>
+      </div>
+      <div class="prog-card">
+        <h3>W1 → Current</h3>
+        <div id="prog-trend"></div>
+      </div>
+    </div>
+    <div class="table-card">
+      <h3>Week by Week — Main Lifts (kg)</h3>
+      <div id="prog-table"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TIMER -->
+<div class="timer" id="timer">
+  <div class="timer-label">Rest Timer</div>
+  <div class="timer-count" id="timer-count">90</div>
+  <div class="timer-bar"><div class="timer-fill" id="timer-fill"></div></div>
+  <div class="timer-dismiss" onclick="stopTimer()">Dismiss</div>
+</div>
+
+<script>
+// ── PROGRAM DATA ──────────────────────────────────────────────────────────────
+const DAYS = [
+  {
+    id:0, label:"SQUAT", tag:"Legs / Quads", num:"01",
+    title:"SQUAT DAY — LEGS / QUADS", sub:"Rack-based · ~55 min · Mon recommended",
+    blocks:[
+      { id:"A", label:"Main Lift", note:"Rack — 2 min rest between sets", compound:true,
+        exercises:[
+          {id:"a1",letter:"A",primary:true,name:"Barbell Back Squat",cue:"2s pause at bottom · drive through heels · RPE 8",sets:4,reps:"5",intensity:"Heavy"}
+        ], rest:120
+      },
+      { id:"B", label:"Superset B", note:"Moderate — 90s after pair",
+        exercises:[
+          {id:"b1",letter:"B1",primary:true,name:"Bulgarian Split Squat",cue:"Rear foot on rack pin · DBs in hands · stay upright · knee tracks toe",sets:3,reps:"10",intensity:"Each leg"},
+          {id:"b2",letter:"B2",primary:false,name:"Goblet Squat",cue:"Chest up · elbows inside knees · controlled descent · pause at bottom",sets:3,reps:"10",intensity:"Moderate"}
+        ], rest:90
+      },
+      { id:"C", label:"Superset C", note:"Light — 60s after pair",
+        exercises:[
+          {id:"c1",letter:"C1",primary:true,name:"Prone Hamstring Curl",cue:"Hips down · controlled eccentric · squeeze at top",sets:3,reps:"12",intensity:"Light"},
+          {id:"c2",letter:"C2",primary:false,name:"Plank Hold",cue:"Dead straight · no hips dropping · breathe through it",sets:3,reps:"45s",intensity:"Core"}
+        ], rest:60
+      }
+    ],
+    notes:["Squat is standalone — full 2 min rest between each set. Non-negotiable.","BSS + Goblet is a brutal quad superset — expect the burn on round 3.","Prone curl at the end balances the quad-dominant session. Don't skip it."]
+  },
+  {
+    id:1, label:"BENCH", tag:"Push / Chest", num:"02",
+    title:"BENCH DAY — PUSH / CHEST", sub:"Bench-based · ~45 min · Tue recommended",
+    blocks:[
+      { id:"A", label:"Superset A", note:"Heavy — 90s after pair", compound:true,
+        exercises:[
+          {id:"a1",letter:"A1",primary:true,name:"Barbell Bench Press",cue:"Retract scapula · controlled descent · slight arch · drive feet into floor",sets:4,reps:"5",intensity:"Heavy"},
+          {id:"a2",letter:"A2",primary:false,name:"DB Skull Crusher",cue:"Elbows fixed · lower to forehead · full extension at top · on bench",sets:4,reps:"10",intensity:"Triceps"}
+        ], rest:90
+      },
+      { id:"B", label:"Superset B", note:"Moderate — 75s after pair",
+        exercises:[
+          {id:"b1",letter:"B1",primary:true,name:"Incline DB Press",cue:"30–45° incline · full stretch at bottom · upper chest focus · slow eccentric",sets:3,reps:"10",intensity:"Moderate"},
+          {id:"b2",letter:"B2",primary:false,name:"Cable Pulldown",cue:"Wide grip · pull to upper chest · squeeze lats · controlled return",sets:3,reps:"10",intensity:"Moderate"}
+        ], rest:75
+      },
+      { id:"C", label:"Superset C", note:"Light — 60s after pair",
+        exercises:[
+          {id:"c1",letter:"C1",primary:true,name:"DB Chest Fly",cue:"Wide arc · slight bend in elbows · deep stretch · squeeze at top",sets:3,reps:"12",intensity:"Light"},
+          {id:"c2",letter:"C2",primary:false,name:"Tricep Dips (bench)",cue:"Hands on bench behind · elbows back · lower to 90° · press up tall",sets:3,reps:"12",intensity:"Triceps"}
+        ], rest:60
+      }
+    ],
+    notes:["Skull crusher pairs with bench — triceps pre-fatigued before the isolation work later.","Cable pulldown is the only back movement today — keep it strict and controlled.","Chest fly gives a deep stretch bench and incline can't replicate. Light and slow."]
+  },
+  {
+    id:2, label:"DEAD", tag:"Hinge / Back", num:"03",
+    title:"DEADLIFT DAY — HINGE / BACK", sub:"Floor / rack · ~50 min · Thu recommended",
+    blocks:[
+      { id:"A", label:"Superset A", note:"Heavy — 2 min rest after pair", compound:true,
+        exercises:[
+          {id:"a1",letter:"A1",primary:true,name:"Conventional Deadlift",cue:"Brace hard · bar mid-foot · hinge don't squat · reset each rep",sets:4,reps:"5",intensity:"Heavy"},
+          {id:"a2",letter:"A2",primary:false,name:"Dead Hang or Farmer's Carry",cue:"30s hang for grip + decompression · OR 20m loaded carry",sets:4,reps:"30s",intensity:"Grip/carry"}
+        ], rest:120
+      },
+      { id:"B", label:"Superset B", note:"Moderate — 75s after pair",
+        exercises:[
+          {id:"b1",letter:"B1",primary:true,name:"Barbell Romanian Deadlift",cue:"Hinge until hamstrings load · soft knees · bar stays close to legs",sets:3,reps:"10",intensity:"Moderate"},
+          {id:"b2",letter:"B2",primary:false,name:"Barbell Bent-Over Row",cue:"Hinge to ~45° · pull to lower chest · squeeze at top · same bar",sets:3,reps:"10",intensity:"Moderate"}
+        ], rest:75
+      },
+      { id:"C", label:"Superset C", note:"Light — 60s after pair",
+        exercises:[
+          {id:"c1",letter:"C1",primary:true,name:"Barbell or DB Curl",cue:"No swing · full supination at top · slow eccentric · elbows fixed",sets:3,reps:"12",intensity:"Light"},
+          {id:"c2",letter:"C2",primary:false,name:"DB Hammer Curl",cue:"Neutral grip · brachialis focus · slow eccentric · alternate arms",sets:3,reps:"12",intensity:"Light"}
+        ], rest:60
+      }
+    ],
+    notes:["Only session with 2 min rest on the main lift — deadlifts are the most CNS-demanding.","RDL + BB Row use the same bar — no reracking, efficient transition.","Curl superset is a pump finisher — keep it light and strict, not heavy."]
+  },
+  {
+    id:3, label:"PRESS", tag:"OHP / Upper", num:"04",
+    title:"PRESS DAY — OHP / UPPER", sub:"Rack / DB area · ~45 min · Sat recommended",
+    blocks:[
+      { id:"A", label:"Superset A", note:"Heavy — 90s after pair", compound:true,
+        exercises:[
+          {id:"a1",letter:"A1",primary:true,name:"Barbell Overhead Press",cue:"Standing · brace glutes + core · bar path straight up · no layback",sets:4,reps:"5",intensity:"Heavy"},
+          {id:"a2",letter:"A2",primary:false,name:"KB Upright Row",cue:"Elbows lead · pull to chin height · controlled descent · rear delt focus",sets:4,reps:"10",intensity:"Moderate"}
+        ], rest:90
+      },
+      { id:"B", label:"Superset B", note:"Moderate — 75s after pair",
+        exercises:[
+          {id:"b1",letter:"B1",primary:true,name:"Arnold Press",cue:"Seated · start palms facing in · rotate out as you press · full range",sets:3,reps:"10",intensity:"Moderate"},
+          {id:"b2",letter:"B2",primary:false,name:"DB Lateral Raise",cue:"Slight forward lean · lead with elbows · pause at top · slow down",sets:3,reps:"10",intensity:"Moderate"}
+        ], rest:75
+      },
+      { id:"C", label:"Superset C", note:"Light — 60s after pair",
+        exercises:[
+          {id:"c1",letter:"C1",primary:true,name:"DB Rear Delt Fly",cue:"Seated bent-over · lead with elbows · light and strict · squeeze at top",sets:3,reps:"12",intensity:"Light"},
+          {id:"c2",letter:"C2",primary:false,name:"Face Pull",cue:"Cable or band · pull to face · external rotation · elbows high",sets:3,reps:"12",intensity:"Light"}
+        ], rest:60
+      }
+    ],
+    notes:["OHP + KB upright row — front delts press, rear delts pull. Balanced A superset.","Arnold + lateral raise covers all three delt heads in one superset.","Rear delt fly + face pull = maximum posterior shoulder work. Critical for posture."]
+  }
+];
+
+const WEEKS = 8;
+const SK = "gym-v4";
+let currentWeek = 1;
+let currentDay = 0;
+let currentView = "workout";
+let timerInterval = null;
+let timerTotal = 0;
+
+// ── STORAGE ───────────────────────────────────────────────────────────────────
+function loadData(){try{return JSON.parse(localStorage.getItem(SK)||"{}");}catch(e){return{};}}
+function saveData(d){
+  try{
+    localStorage.setItem(SK,JSON.stringify(d));
+    const el=document.getElementById("saving-indicator");
+    el.textContent="SAVED";
+    setTimeout(()=>el.textContent="",800);
+  }catch(e){}
+}
+let DB = loadData();
+
+function getSet(w,d,ex,s){return DB[`w${w}-d${d}-${ex}-s${s}`]||{kg:"",reps:"",done:false};}
+function setSet(w,d,ex,s,field,val){
+  const k=`w${w}-d${d}-${ex}-s${s}`;
+  DB[k]={...getSet(w,d,ex,s),[field]:val};
+  saveData(DB);
+}
+
+function getBest(dayId,exId){
+  let best=0;
+  for(let w=1;w<=WEEKS;w++)for(let s=0;s<6;s++){
+    const v=parseFloat(DB[`w${w}-d${dayId}-${exId}-s${s}`]?.kg||0);
+    if(v>best)best=v;
+  }
+  return best;
+}
+function getPrevWeekBest(dayId,exId){
+  if(currentWeek<=1)return 0;
+  let best=0;
+  for(let s=0;s<6;s++){
+    const v=parseFloat(DB[`w${currentWeek-1}-d${dayId}-${exId}-s${s}`]?.kg||0);
+    if(v>best)best=v;
+  }
+  return best;
+}
+function getWeekBest(w,dayId,exId){
+  let best=0;
+  for(let s=0;s<6;s++){
+    const v=parseFloat(DB[`w${w}-d${dayId}-${exId}-s${s}`]?.kg||0);
+    if(v>best)best=v;
+  }
+  return best;
+}
+function dayHasData(dayId){
+  return Object.keys(DB).some(k=>k.startsWith(`w${currentWeek}-d${dayId}-`));
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderWeekBtns(){
+  const c=document.getElementById("week-btns");
+  c.innerHTML="";
+  for(let w=1;w<=WEEKS;w++){
+    const b=document.createElement("div");
+    b.className="wbtn"+(w===currentWeek?" active":"");
+    b.textContent="W"+w;
+    b.onclick=(()=>{const ww=w;return()=>{currentWeek=ww;renderAll();}})();
+    c.appendChild(b);
+  }
+}
+
+function renderDayNav(){
+  const c=document.getElementById("day-nav");
+  c.innerHTML="";
+  DAYS.forEach(d=>{
+    const b=document.createElement("div");
+    b.className="dbtn"+(d.id===currentDay?" active":"");
+    const hasDot=dayHasData(d.id);
+    b.innerHTML=`
+      <div class="dot" style="display:${hasDot?'block':'none'}"></div>
+      <span class="dl">Day ${d.id+1}</span>
+      <span class="dn">${d.label}</span>
+      <span class="dt">${d.tag}</span>`;
+    b.onclick=(()=>{const dd=d.id;return()=>{currentDay=dd;window.scrollTo({top:0,behavior:'smooth'});renderAll();}})();
+    c.appendChild(b);
+  });
+}
+
+function renderWorkout(){
+  const day=DAYS[currentDay];
+
+  // Header
+  document.getElementById("day-header-area").innerHTML=`
+    <div class="day-header">
+      <div class="day-num">${day.num}</div>
+      <div><div class="day-title">${day.title}</div><div class="day-sub">${day.sub}</div></div>
+    </div>`;
+
+  // Blocks
+  const ba=document.getElementById("blocks-area");
+  ba.innerHTML="";
+  day.blocks.forEach(block=>{
+    const blockEl=document.createElement("div");
+    blockEl.className="block";
+    let html=`<div class="block-header">
+      <span class="block-label">${block.label}</span>
+      <span class="block-note">${block.note}</span>
+      ${block.compound?'<span class="compound-tag">★ Compound</span>':''}
+    </div>`;
+
+    block.exercises.forEach((ex,ei)=>{
+      const prevW=getPrevWeekBest(day.id,ex.id);
+      const allB=getBest(day.id,ex.id);
+      const showPrev=prevW>0?`Last week: <span>${prevW}kg</span>`:allB>0?`Best: <span>${allB}kg</span>`:"";
+      html+=`<div class="ex-block ${ex.primary?'primary':'secondary'}" id="exblock-${day.id}-${ex.id}">
+        <div class="ex-top">
+          <div class="ex-left">
+            <span class="ex-letter ${ex.primary?'p':'s'}">${ex.letter}</span>
+            <div><div class="ex-name">${ex.name}</div><div class="ex-cue">${ex.cue}</div></div>
+          </div>
+          <div class="ex-sets-label">
+            <div class="ex-sets-main">${ex.sets} × ${ex.reps}</div>
+            <div class="ex-sets-sub">${ex.intensity}</div>
+          </div>
+        </div>
+        <div class="logger">
+          <div class="logger-title">Log Sets</div>
+          <div class="set-rows" id="sets-${day.id}-${ex.id}"></div>
+          ${showPrev?`<div class="prev-best">${showPrev}</div>`:''}
+        </div>
+      </div>`;
+    });
+
+    const restLabel=block.rest>=120?`${block.rest/60} min`:`${block.rest} sec`;
+    html+=`<div class="rest-row">
+      <span class="rest-label">⏱ ${restLabel} rest</span>
+      <button class="rest-btn" onclick="startTimer(${block.rest})">Start Timer</button>
+    </div>`;
+
+    blockEl.innerHTML=html;
+    ba.appendChild(blockEl);
+
+    // Render set inputs
+    block.exercises.forEach(ex=>{
+      const container=document.getElementById(`sets-${day.id}-${ex.id}`);
+      if(!container)return;
+      for(let s=0;s<ex.sets;s++){
+        const sd=getSet(currentWeek,day.id,ex.id,s);
+        const row=document.createElement("div");
+        row.className="set-row";
+        row.innerHTML=`
+          <span class="set-num">S${s+1}</span>
+          <input class="set-input" type="number" inputmode="decimal" placeholder="kg" value="${sd.kg}">
+          <input class="set-input" type="number" inputmode="numeric" placeholder="reps" value="${sd.reps}">
+          <div class="tick${sd.done?' done':''}">  ${sd.done?'✓':''}</div>`;
+        const inputs=row.querySelectorAll("input");
+        inputs[0].onchange=((ww,dd,ee,ss)=>function(){setSet(ww,dd,ee,ss,"kg",this.value);})(currentWeek,day.id,ex.id,s);
+        inputs[1].onchange=((ww,dd,ee,ss)=>function(){setSet(ww,dd,ee,ss,"reps",this.value);})(currentWeek,day.id,ex.id,s);
+        const tick=row.querySelector(".tick");
+        tick.onclick=((ww,dd,ee,ss,t)=>function(){
+          const cur=getSet(ww,dd,ee,ss);
+          setSet(ww,dd,ee,ss,"done",!cur.done);
+          t.classList.toggle("done",!cur.done);
+          t.textContent=!cur.done?'✓':'';
+        })(currentWeek,day.id,ex.id,s,tick);
+        container.appendChild(row);
+      }
+    });
+  });
+
+  // Notes
+  const na=document.getElementById("notes-area");
+  na.innerHTML=`<div class="notes-title">Coaching Notes</div>${day.notes.map(n=>`<div class="note-item">${n}</div>`).join("")}`;
+}
+
+function renderProgress(){
+  const mainLifts=[
+    {dayId:0,exId:"a1",name:"Back Squat"},
+    {dayId:1,exId:"a1",name:"Bench Press"},
+    {dayId:2,exId:"a1",name:"Deadlift"},
+    {dayId:3,exId:"a1",name:"OHP"}
+  ];
+
+  // Best
+  document.getElementById("prog-best").innerHTML=mainLifts.map(l=>{
+    const b=getBest(l.dayId,l.exId);
+    return`<div class="lift-row"><span class="lift-name">${l.name}</span><span class="lift-val ${b>0?'up':'none'}">${b>0?b+"kg":"—"}</span></div>`;
+  }).join("");
+
+  // Trend
+  document.getElementById("prog-trend").innerHTML=mainLifts.map(l=>{
+    const ws=Array.from({length:WEEKS},(_,i)=>getWeekBest(i+1,l.dayId,l.exId)).filter(v=>v>0);
+    if(ws.length<2)return`<div class="lift-row"><span class="lift-name">${l.name}</span><span class="lift-val none">Need 2+ weeks</span></div>`;
+    const diff=ws[ws.length-1]-ws[0];
+    const cls=diff>0?"up":diff<0?"red":"none";
+    return`<div class="lift-row"><span class="lift-name">${l.name}</span>
+      <div class="lift-change">
+        <span class="lift-prev">${ws[0]}kg</span>
+        <span class="lift-arrow">→</span>
+        <span class="lift-val ${cls}">${ws[ws.length-1]}kg${diff>0?" +"+diff:diff<0?" "+diff:""}</span>
+      </div></div>`;
+  }).join("");
+
+  // Table
+  let tableHTML=`<table><thead><tr><th class="lift-col">Lift</th>`;
+  for(let w=1;w<=WEEKS;w++)tableHTML+=`<th class="${w===currentWeek?'cur':''}"">W${w}</th>`;
+  tableHTML+=`</tr></thead><tbody>`;
+  mainLifts.forEach(l=>{
+    tableHTML+=`<tr><td class="lift-col">${l.name.split(" ")[0]}</td>`;
+    for(let w=1;w<=WEEKS;w++){
+      const v=getWeekBest(w,l.dayId,l.exId);
+      tableHTML+=`<td class="${v>0?'has':''}${w===currentWeek?' cur':''}">${v>0?v:"—"}</td>`;
+    }
+    tableHTML+=`</tr>`;
+  });
+  tableHTML+=`</tbody></table>`;
+  document.getElementById("prog-table").innerHTML=tableHTML;
+}
+
+function renderAll(){
+  renderWeekBtns();
+  renderDayNav();
+  if(currentView==="workout")renderWorkout();
+  else renderProgress();
+}
+
+// ── VIEWS ─────────────────────────────────────────────────────────────────────
+function setView(v){
+  currentView=v;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.textContent.toLowerCase()===v));
+  document.getElementById("workout-view").style.display=v==="workout"?"":"none";
+  document.getElementById("progress-view").style.display=v==="progress"?"":"none";
+  if(v==="progress")renderProgress();
+}
+
+// ── TIMER ─────────────────────────────────────────────────────────────────────
+function startTimer(secs){
+  clearInterval(timerInterval);
+  timerTotal=secs;
+  let rem=secs;
+  const overlay=document.getElementById("timer");
+  const count=document.getElementById("timer-count");
+  const fill=document.getElementById("timer-fill");
+  overlay.style.borderColor="var(--accent2)";
+  overlay.classList.add("active");
+  count.style.color="var(--accent2)";
+  count.textContent=rem;
+  fill.style.background="var(--accent2)";
+  fill.style.width="100%";
+  timerInterval=setInterval(()=>{
+    rem--;
+    count.textContent=rem;
+    fill.style.width=((rem/timerTotal)*100)+"%";
+    if(rem<=0){
+      clearInterval(timerInterval);
+      count.textContent="GO!";
+      count.style.color="var(--accent)";
+      overlay.style.borderColor="var(--accent)";
+      setTimeout(()=>overlay.classList.remove("active"),2000);
+    }
+  },1000);
+}
+function stopTimer(){
+  clearInterval(timerInterval);
+  document.getElementById("timer").classList.remove("active");
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderAll();
+</script>
+</body>
+</html>
