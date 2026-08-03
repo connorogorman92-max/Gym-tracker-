@@ -78,6 +78,8 @@ input[type=number]{-webkit-appearance:none;}
 .set-input::placeholder{color:#2a2a2a;font-size:10px;}
 .tick{width:30px;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.15s;flex-shrink:0;}
 .tick.done{background:rgba(200,245,90,0.15);border-color:var(--accent);}
+.copy-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:#444;cursor:pointer;padding:3px 0 3px 27px;transition:color 0.15s;}
+.copy-btn:hover{color:var(--accent2);}
 .prev-best{font-family:'DM Mono',monospace;font-size:9px;color:#333;padding-left:27px;margin-top:3px;}
 .prev-best span{color:var(--accent2);}
 
@@ -255,14 +257,18 @@ const DAYS = [
           {id:"b2",letter:"B2",primary:false,name:"Goblet Squat",cue:"Chest up · elbows inside knees · controlled descent · pause at bottom",sets:3,reps:"10",intensity:"Moderate"}
         ], rest:90
       },
-      { id:"C", label:"Superset C", note:"Light — 60s after pair",
+      { id:"C", label:"Finisher C", note:"Light — 60s after set",
         exercises:[
-          {id:"c1",letter:"C1",primary:true,name:"Prone Hamstring Curl",cue:"Hips down · controlled eccentric · squeeze at top",sets:3,reps:"12",intensity:"Light"},
-          {id:"c2",letter:"C2",primary:false,name:"Plank Hold",cue:"Dead straight · no hips dropping · breathe through it",sets:3,reps:"45s",intensity:"Core"}
+          {id:"c1",letter:"C1",primary:true,name:"Prone Hamstring Curl",cue:"Hips down · controlled eccentric · squeeze at top",sets:3,reps:"12",intensity:"Light"}
+        ], rest:60
+      },
+      { id:"D", label:"Finisher D", note:"Quad burnout — 60s after set", standalone:true,
+        exercises:[
+          {id:"d1",letter:"D",primary:true,name:"Seated Leg Extension",cue:"Full extension · squeeze at top · slow eccentric · toes slightly out",sets:3,reps:"15",intensity:"Light"}
         ], rest:60
       }
     ],
-    notes:["Squat is standalone — full 2 min rest between each set. Non-negotiable.","BSS + Goblet is a brutal quad superset — expect the burn on round 3.","Prone curl at the end balances the quad-dominant session. Don't skip it."]
+    notes:["Squat is standalone — full 2 min rest between each set. Non-negotiable.","BSS + Goblet is a brutal quad superset — expect the burn on round 3.","Leg extension at the end is a pure quad isolation finisher — keep it light and controlled."]
   },
   {
     id:1, label:"BENCH", tag:"Push / Chest", num:"02",
@@ -280,23 +286,21 @@ const DAYS = [
           {id:"b2",letter:"B2",primary:false,name:"Cable Pulldown",cue:"Wide grip · pull to upper chest · squeeze lats · controlled return",sets:3,reps:"10",intensity:"Moderate"}
         ], rest:75
       },
-      { id:"C", label:"Superset C", note:"Light — 60s after pair",
+      { id:"C", label:"Finisher C", note:"High volume — 60s after set",
         exercises:[
-          {id:"c1",letter:"C1",primary:true,name:"DB Chest Fly",cue:"Wide arc · slight bend in elbows · deep stretch · squeeze at top",sets:3,reps:"12",intensity:"Light"},
-          {id:"c2",letter:"C2",primary:false,name:"Tricep Dips (bench)",cue:"Hands on bench behind · elbows back · lower to 90° · press up tall",sets:3,reps:"12",intensity:"Triceps"}
+          {id:"c1",letter:"C",primary:true,name:"Seated Chest Press (Machine)",cue:"Full stretch at bottom · squeeze at top · controlled tempo · chest leads not arms",sets:3,reps:"15",intensity:"Light"}
         ], rest:60
       }
     ],
-    notes:["Skull crusher pairs with bench — triceps pre-fatigued before the isolation work later.","Cable pulldown is the only back movement today — keep it strict and controlled.","Chest fly gives a deep stretch bench and incline can't replicate. Light and slow."]
+    notes:["Skull crusher pairs with bench — triceps pre-fatigued before the isolation work later.","Cable pulldown is the only back movement today — keep it strict and controlled.","Seated chest press finisher — higher reps, full stretch, pump the chest out at the end."]
   },
   {
     id:2, label:"DEAD", tag:"Hinge / Back", num:"03",
     title:"DEADLIFT DAY — HINGE / BACK", sub:"Floor / rack · ~50 min · Thu recommended",
     blocks:[
-      { id:"A", label:"Superset A", note:"Heavy — 2 min rest after pair", compound:true,
+      { id:"A", label:"Main Lift", note:"Heavy — 2 min rest between sets", compound:true,
         exercises:[
-          {id:"a1",letter:"A1",primary:true,name:"Conventional Deadlift",cue:"Brace hard · bar mid-foot · hinge don't squat · reset each rep",sets:4,reps:"5",intensity:"Heavy"},
-          {id:"a2",letter:"A2",primary:false,name:"Dead Hang or Farmer's Carry",cue:"30s hang for grip + decompression · OR 20m loaded carry",sets:4,reps:"30s",intensity:"Grip/carry"}
+          {id:"a1",letter:"A",primary:true,name:"Conventional Deadlift",cue:"Brace hard · bar mid-foot · hinge don't squat · reset each rep",sets:4,reps:"5",intensity:"Heavy"}
         ], rest:120
       },
       { id:"B", label:"Superset B", note:"Moderate — 75s after pair",
@@ -312,7 +316,7 @@ const DAYS = [
         ], rest:60
       }
     ],
-    notes:["Only session with 2 min rest on the main lift — deadlifts are the most CNS-demanding.","RDL + BB Row use the same bar — no reracking, efficient transition.","Curl superset is a pump finisher — keep it light and strict, not heavy."]
+    notes:["Deadlift is standalone — full 2 min rest between each set. Most CNS-demanding lift.","RDL + BB Row use the same bar — no reracking, efficient transition.","Curl superset is a pump finisher — keep it light and strict, not heavy."]
   },
   {
     id:3, label:"PRESS", tag:"OHP / Upper", num:"04",
@@ -505,6 +509,23 @@ function renderWorkout(){
           t.textContent=!cur.done?'✓':'';
         })(currentWeek,day.id,ex.id,s,tick);
         container.appendChild(row);
+
+        // Copy last set button (show from S2 onwards)
+        if(s>0){
+          const copyBtn=document.createElement("div");
+          copyBtn.className="copy-btn";
+          copyBtn.textContent="↑ Copy S"+(s);
+          copyBtn.onclick=((ww,dd,ee,ss,r)=>function(){
+            const prev=getSet(ww,dd,ee,ss-1);
+            if(!prev.kg&&!prev.reps)return;
+            const ins=r.querySelectorAll("input");
+            if(prev.kg){ins[0].value=prev.kg;setSet(ww,dd,ee,ss,"kg",prev.kg);}
+            if(prev.reps){ins[1].value=prev.reps;setSet(ww,dd,ee,ss,"reps",prev.reps);}
+            copyBtn.textContent="✓ Copied";
+            setTimeout(()=>copyBtn.textContent="↑ Copy S"+ss,1200);
+          })(currentWeek,day.id,ex.id,s,row);
+          container.appendChild(copyBtn);
+        }
       }
     });
   });
